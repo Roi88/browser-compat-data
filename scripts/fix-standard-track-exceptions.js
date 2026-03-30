@@ -217,6 +217,7 @@ const instructions = `
     ${styleText('cyan', 'x')}            Fetch xref suggestions for the current feature
     ${styleText('cyan', 'x <term>')}     Fetch xref suggestions for a custom search term
     ${styleText('cyan', 'p')}            Use parent feature's spec_url
+    ${styleText('cyan', 'p,https://...')} Use parent spec_url + extra URL on this subfeature
     ${styleText('cyan', 'p=https://...')} Set spec_url on parent + this subfeature
     ${styleText('cyan', 'f')}            Set standard_track to false (+ all subfeatures)
     ${styleText('cyan', '(Enter)')}      Skip this entry
@@ -509,6 +510,38 @@ while (idx < exceptions.length) {
         return c;
       });
       recordSpecUrl(featurePath, ancestor.spec_url);
+      remaining.delete(featurePath);
+      lastAction = {
+        index: i,
+        /**
+         *
+         */
+        undo: () => {
+          updateFeatures([featurePath], (c) => {
+            delete c.spec_url;
+            return c;
+          });
+          remaining.add(featurePath);
+        },
+      };
+      break;
+    }
+
+    if (answer.startsWith('p,https://')) {
+      if (!ancestor) {
+        console.log(styleText('red', '  No ancestor with spec_url found.'));
+        continue;
+      }
+      const extra = answer
+        .slice(2)
+        .split(',')
+        .map((u) => u.trim());
+      const specUrl = [...[ancestor.spec_url].flat(), ...extra];
+      updateFeatures([featurePath], (c) => {
+        c.spec_url = specUrl;
+        return c;
+      });
+      recordSpecUrl(featurePath, specUrl);
       remaining.delete(featurePath);
       lastAction = {
         index: i,
