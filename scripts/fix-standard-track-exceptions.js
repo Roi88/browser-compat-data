@@ -195,7 +195,14 @@ const fetchXrefSuggestions = async (
     return (data.result?.[0]?.[1] ?? [])
       .flatMap((m) => {
         const base = specMap.get(m.shortname);
-        return base ? [`${base}${m.uri}`] : [];
+        if (!base) {
+          return [];
+        }
+        try {
+          return [new URL(m.uri, `${base}/`).href];
+        } catch {
+          return [];
+        }
       })
       .slice(0, 5);
   } catch {
