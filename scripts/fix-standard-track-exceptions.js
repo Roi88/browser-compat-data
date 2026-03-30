@@ -37,9 +37,71 @@ import {
 
 import { updateFeatures } from './bulk-editor/utils.js';
 
+/**
+ * Index of spec URLs used by other BCD features with the same last path segment.
+ * Built at startup by traversing the full BCD dataset, and updated during the
+ * session as the user assigns new spec URLs.
+ * @type {Map<string, string[]>}
+ */
+const specUrlBySegment = (() => {
+  /** @type {Map<string, Map<string, number>>} */
+  const counts = new Map();
+  /**
+   * Recursively index spec URLs from a BCD identifier subtree.
+   * @param {Identifier} node BCD identifier node to traverse
+   */
+  const traverse = (node) => {
+    for (const [key, val] of Object.entries(node)) {
+      if (key === '__compat' || typeof val !== 'object' || val === null) {
+        continue;
+      }
+      const child = /** @type {Identifier} */ (val);
+      if (child.__compat?.spec_url) {
+        let urlCounts = counts.get(key);
+        if (!urlCounts) {
+          urlCounts = new Map();
+          counts.set(key, urlCounts);
+        }
+        for (const url of [child.__compat.spec_url].flat()) {
+          urlCounts.set(url, (urlCounts.get(url) ?? 0) + 1);
+        }
+      }
+      traverse(child);
+    }
+  };
+  for (const topLevel of Object.values(bcd)) {
+    traverse(/** @type {Identifier} */ (topLevel));
+  }
+  /** @type {Map<string, string[]>} */
+  const result = new Map();
+  for (const [seg, urlCounts] of counts) {
+    result.set(
+      seg,
+      [...urlCounts.entries()].sort((a, b) => b[1] - a[1]).map(([u]) => u),
+    );
+  }
+  return result;
+})();
+
+/**
+ * Record a newly assigned spec URL so it appears in future suggestions.
+ * @param {string} featurePath Dot-separated feature path that received the URL
+ * @param {string | string[]} specUrl The spec URL(s) that were assigned
+ */
+const recordSpecUrl = (featurePath, specUrl) => {
+  const segment = featurePath.split('.').pop() ?? featurePath;
+  const newUrls = [specUrl].flat();
+  const existing = specUrlBySegment.get(segment) ?? [];
+  const toAdd = newUrls.filter((u) => !existing.includes(u));
+  if (toAdd.length > 0) {
+    specUrlBySegment.set(segment, [...toAdd, ...existing]);
+  }
+};
+
 const instructions = `
   ${styleText('bold', 'Actions:')}
     ${styleText('cyan', 'https://...')}  Add the URL as spec_url (comma-separated for multiple)
+    ${styleText('cyan', '1-9')}          Accept a numbered suggestion
     ${styleText('cyan', 'p')}            Use parent feature's spec_url
     ${styleText('cyan', 'p=https://...')} Set spec_url on parent + this subfeature
     ${styleText('cyan', 'f')}            Set standard_track to false (+ all subfeatures)
@@ -91,7 +153,7 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-const prompt = `  ${styleText('dim', 'Paste spec url, p(arent), f(alse), /skip-to, or ?')}
+const prompt = `  ${styleText('dim', 'URL, 1-9 (suggestion), p, f, /skip-to, or ?')}
   > `;
 
 /** Save progress and exit */
@@ -214,6 +276,18 @@ while (idx < exceptions.length) {
     console.log(styleText('dim', '  (no ancestor with spec_url)'));
   }
 
+  // Print suggestions from other BCD features with the same segment name
+  const lastSegment = featurePath.split('.').pop() ?? featurePath;
+  const suggestions = (specUrlBySegment.get(lastSegment) ?? []).slice(0, 5);
+  if (suggestions.length > 0) {
+    console.log(styleText('dim', '  suggestions:'));
+    for (let s = 0; s < suggestions.length; s++) {
+      console.log(
+        `    ${styleText('dim', `[${s + 1}]`)} ${styleText('underline', suggestions[s])}`,
+      );
+    }
+  }
+
   // Prompt loop (re-prompt on ?, o, and invalid input)
   while (true) {
     const answer = (await rl.question(prompt)).trim();
@@ -294,6 +368,7 @@ while (idx < exceptions.length) {
         c.spec_url = ancestor.spec_url;
         return c;
       });
+      recordSpecUrl(featurePath, ancestor.spec_url);
       remaining.delete(featurePath);
       lastAction = {
         index: i,
@@ -324,6 +399,7 @@ while (idx < exceptions.length) {
         c.spec_url = specUrl;
         return c;
       });
+      recordSpecUrl(featurePath, specUrl);
       remaining.delete(featurePath);
       lastAction = {
         index: i,
@@ -345,6 +421,34 @@ while (idx < exceptions.length) {
       break;
     }
 
+    const suggestionNum = Number(answer);
+    if (
+      Number.isInteger(suggestionNum) &&
+      suggestionNum >= 1 &&
+      suggestionNum <= suggestions.length
+    ) {
+      const specUrl = suggestions[suggestionNum - 1];
+      updateFeatures([featurePath], (c) => {
+        c.spec_url = specUrl;
+        return c;
+      });
+      remaining.delete(featurePath);
+      lastAction = {
+        index: i,
+        /**
+         *
+         */
+        undo: () => {
+          updateFeatures([featurePath], (c) => {
+            delete c.spec_url;
+            return c;
+          });
+          remaining.add(featurePath);
+        },
+      };
+      break;
+    }
+
     if (answer.startsWith('https://')) {
       const urls = answer.split(',').map((u) => u.trim());
       const specUrl = urls.length === 1 ? urls[0] : urls;
@@ -352,6 +456,7 @@ while (idx < exceptions.length) {
         c.spec_url = specUrl;
         return c;
       });
+      recordSpecUrl(featurePath, specUrl);
       remaining.delete(featurePath);
       lastAction = {
         index: i,
