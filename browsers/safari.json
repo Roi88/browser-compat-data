@@ -407,6 +407,13 @@
           "status": "beta",
           "engine": "WebKit",
           "engine_version": "624.2.1"
+        },
+        "preview": {
+          "release_date": "2026-03-26",
+          "release_notes": "https://webkit.org/blog/17896/release-notes-for-safari-technology-preview-240/",
+          "status": "nightly",
+          "engine": "WebKit",
+          "engine_version": "625.1.10"
         }
       }
     }
