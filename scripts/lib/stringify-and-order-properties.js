@@ -80,7 +80,15 @@ const doOrder = (value, order) => {
 export const stringifyReleases = (releases) => {
   const indentStep = '  '; // Constant with the indent step that sortStringify will use
 
-  const sortedKeys = Object.keys(releases).sort(compareVersions);
+  const sortedKeys = Object.keys(releases).sort((a, b) => {
+    if (a === 'preview') {
+      return 1;
+    }
+    if (b === 'preview') {
+      return -1;
+    }
+    return compareVersions(a, b);
+  });
 
   let result = '';
   for (let i = 0; i < sortedKeys.length; i++) {
