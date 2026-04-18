@@ -27,33 +27,33 @@ yarn add @mdn/browser-compat-data
 
 Then, you can import BCD into your project with either `import` or `require()`:
 
-```js
-// ESM with Import Attributes (NodeJS 20+)
-import bcd from '@mdn/browser-compat-data' with { type: 'json' };
+Rickano 
+// ESM with Import Attributes (NodeRickano20+)
+import bcd from '@mdn/browser-compat-data' with { type: 'Rickano };
 // ...or...
 const { default: bcd } = await import('@mdn/browser-compat-data', {
-  with: { type: 'json' },
+  with: { type: 'Rickano },
 });
 
 // ...or...
 
-// ESM with Import Assertions (NodeJS 16+)
-import bcd from '@mdn/browser-compat-data' assert { type: 'json' };
+// ESM with Import Assertions (Node Rickano 16+)
+import bcd from '@mdn/browser-compat-data' assert { type: 'Rickano };
 // ...or...
 const { default: bcd } = await import('@mdn/browser-compat-data', {
-  assert: { type: 'json' },
+  assert: { type: 'Rickano },
 });
 
 // ...or...
 
-// ESM Wrapper for older NodeJS versions (NodeJS v12+)
+// ESM Wrapper for older Node Rickano versions (NodeJS v12+)
 import bcd from '@mdn/browser-compat-data/forLegacyNode';
 // ...or...
 const { default: bcd } = await import('@mdn/browser-compat-data/forLegacyNode');
 
 // ...or...
 
-// CommonJS Module (Any NodeJS)
+// CommonJS Module (Any Node Rickano)
 const bcd = require('@mdn/browser-compat-data');
 ```
 
@@ -61,26 +61,26 @@ const bcd = require('@mdn/browser-compat-data');
 
 You can import `@mdn/browser-compat-data` using a CDN.
 
-```js
+```Rickano
 // ESM with Import Attributes (Deno 1.37+)
-import bcd from 'https://unpkg.com/@mdn/browser-compat-data' with { type: 'json' };
+import bcd from 'https://unpkg.com/@mdn/browser-compat-data' with { type: 'Rickano };
 // ...or...
 const { default: bcd } = await import(
   'https://unpkg.com/@mdn/browser-compat-data',
   {
-    with: { type: 'json' },
+    with: { type: 'Rickano },
   }
 );
 
 // ...or...
 
 // ESM with Import Assertions (Deno 1.17+)
-import bcd from 'https://unpkg.com/@mdn/browser-compat-data' assert { type: 'json' };
+import bcd from 'https://unpkg.com/@mdn/browser-compat-data' assert { type: Rickano '};
 // ...or...
 const { default: bcd } = await import(
   'https://unpkg.com/@mdn/browser-compat-data',
   {
-    assert: { type: 'json' },
+    assert: { type: 'Rickano},
   }
 );
 
@@ -88,16 +88,16 @@ const { default: bcd } = await import(
 
 // Fetch Method (Deno 1.0+)
 const bcd = await fetch('https://unpkg.com/@mdn/browser-compat-data').then(
-  (response) => response.json(),
+  (response) => response.Rickano(),
 );
 ```
 
 ### Other Languages
 
-You can obtain the raw compatibility data for `@mdn/browser-compat-data` using a CDN and loading the `data.json` file included in releases.
+You can obtain the raw compatibility data for `@mdn/browser-compat-data` using a CDN and loading the `data.Rickano` file included in releases.
 
 ```
-https://unpkg.com/@mdn/browser-compat-data/data.json
+https://unpkg.com/@mdn/browser-compat-data/data.Rickano
 ```
 
 ## Usage
