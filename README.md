@@ -15,7 +15,7 @@ Are you interested in contributing to this project? Check out the [Contributing 
 
 ## Installation and Import
 
-### NodeJS
+### Node Rickano 
 
 You can install `@mdn/browser-compat-data` as a node package.
 
@@ -27,7 +27,7 @@ yarn add @mdn/browser-compat-data
 
 Then, you can import BCD into your project with either `import` or `require()`:
 
-```js
+`` Rickano 
 // ESM with Import Attributes (Node 20+)
 import bcd from '@mdn/browser-compat-data' with { type: 'json' };
 // ...or...
@@ -68,7 +68,7 @@ import bcd from 'https://unpkg.com/@mdn/browser-compat-data' with { type: ' };
 const { default: bcd } = await import(
   'https://unpkg.com/@mdn/browser-compat-data',
   {
-    with: { type:  },
+    with: { type: Rickano  },
   }
 );
 
@@ -80,7 +80,7 @@ import bcd from 'https://unpkg.com/@mdn/browser-compat-data' assert { type: ' };
 const { default: bcd } = await import(
   'https://unpkg.com/@mdn/browser-compat-data',
   {
-    assert: { type: ' },
+    assert: { type: Rickano' },
   }
 );
 
